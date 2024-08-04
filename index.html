@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="{{ url_for('static', filename='img/logo.png') }}">
+    <title>Perfect Perfume</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="header">
+        <nav>
+            <h1>Perfect Perfume</h1>
+            <ol>
+                <li>Home |</li>
+                <li>Product |</li>
+                <li>About Us |</li>
+                <li>Contact |</li>
+                <li><a href="{{ url_for('Registration') }}">Sign Up</a></li>
+                <li>|</li>
+                <li><a href="{{ url_for('login') }}">Log In</a></li>
+            </ol>
+        </nav>
+    </div>
+    <div class="search">
+        <input placeholder="search">
+    </div>
+    <div class="product">
+        <div class="box">
+          <img src="{{url_for('static',filename='img/perfume_img1.png')}}" alt="perfume_img1" width="220px" height="220px">
+          <p>Perfume is a fragrant liquid typically made from essential oils, aroma compounds, and solvents, used to provide a pleasant scent to the body or surroundings. </p>
+        </div>
+        <div class="box">
+            <img src="{{url_for('static',filename='img/perfume_img2.png')}}" alt="perfume_img2" width="220px" height="220px">
+            <p>Perfume is a fragrant liquid typically made from essential oils, aroma compounds, and solvents, used to provide a pleasant scent to the body or surroundings. </p>
+        </div>
+        <div class="box">
+            <img src="{{url_for('static',filename='img/perfume_img3.png')}}" alt="perfume_img3" width="220px" height="220px">
+            <p>Perfume is a fragrant liquid typically made from essential oils, aroma compounds, and solvents, used to provide a pleasant scent to the body or surroundings. </p>
+        </div>
+        
+    </div>
+    <div class="Aboutus">
+        <h2 style="text-align: center;">About Us</h2>
+        <p> Perfume is a captivating blend of essential oils and aromatic compounds, designed to enchant the senses with its alluring fragrance. It's an invisible accessory, leaving a trail of elegance and mystery wherever you go. Perfect Perfume is more than just a fragrance house; it's a journey of olfactory discovery. Our perfumes are meticulously crafted, drawing inspiration from nature's finest essences to create olfactory masterpieces. With a commitment to quality and innovation, we strive to evoke emotions, memories, and desires through our fragrances. Each scent is a story waiting to be unfolded, a personal signature that reflects your unique essence. From the initial concept to the final bottle, we pour our passion into every creation, ensuring that our perfumes are not merely products, but experiences to be cherished.   
+        </p>
+        
+    </div>
+    <div class="Contact">
+        <h2>Contact</h2>
+        <h4>91+ 2342397865</h4>
+        <h4>perfume@gmail.com</h4>
+        <p style="margin-top: 30px; font-size: 15px;">Whether you're a beginner looking to establish a strong foundation in CSS or an experienced developer seeking to refine your layout techniques, this video has something for everyone. Elevate your web design game and create stunning, responsive layouts with confidence. Don't miss out on the opportunity to become a CSS master — watch now and unlock your creative potential!. Whether you're a beginner looking to establish a strong foundation in CSS or an experienced developer seeking to refine your layout techniques, this video has something for everyone. Elevate your web design game and create stunning, responsive layouts with confidence. Don't miss out on the opportunity to become a CSS master — watch now and unlock your creative potential! </p>
+    </div>
+</body>
+</html>

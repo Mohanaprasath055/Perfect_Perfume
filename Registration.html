@@ -1,0 +1,77 @@
+<html>
+<head>
+    <title> Registration form </title>
+    <link rel="icon" href="{{ url_for('static',filename='registration_img/logo.png')}}">
+</head>
+<body>
+<form method="POST" action="{{ url_for('Registration') }}">
+    <center>
+    <h1>Registration form</h1>
+    </center>
+    <center>
+    <table>
+        <tr>
+            <td><label for="username">Username:</label></td>  <td> <input type="text" name="username" placeholder="Enter your name"> </td>
+        </tr>
+        
+        <tr>
+            <td><label for="password">Password:</label></td>  <td> <input name="password" placeholder="Set a password"> </td>
+        </tr>
+        <tr>
+            <td><label for="confirm_password">Confirm password:</label></td> <td> <input name="confirm_password" placeholder="confirm your password"> </td>
+        </tr>
+        <tr>
+            <td><label for="email">Email</label></td> <td> <input name="email" placeholder="Enter your email"> </td>
+        </tr>
+        <tr>
+            <td>Gender</td>
+            <td>
+                <label>
+                <input type="radio" name="Gender" value="Male"> Male
+            </label>
+            <label>
+                <input type="radio" name="Gender" value="Female"> Female
+            </label>
+            </td>
+        </tr>
+        <tr>
+            <td><label for="country" >Select country</label></td>
+            <td>
+                <select name="country">
+                    <option>India</option>
+                    <option>Australia</option>
+                    <option>England</option>
+                    <option>south Africa</option>
+                    <option>usa</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <label for="submit" value="submit">
+            <td><input type="submit"></td>
+        </label>
+        <label for="reset">
+            <td><input type="reset" value="reset"></td>
+        </label>
+        </tr>
+    </table>
+    </center> 
+    <center>
+    <hr>
+    <h5>Or</h5>
+    <hr>
+    </center>
+    <center>
+    <h3>Already have an account?</h3>
+    <a href="{{ url_for('login') }}">Log In </a>
+    </center>
+<style>
+    h5,hr{ 
+        display: inline-block;
+        width: 100px;
+    }
+    
+</style>
+</form>
+</body>
+</html>
