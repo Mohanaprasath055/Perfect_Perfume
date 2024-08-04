@@ -25,7 +25,7 @@ def Registration():
          return "password doesn't match",400
 
       register(username,password,email,gender,country)
-      return redirect(url_for('index'))
+      return redirect('index.html')
    return render_template('Registration.html')
 
 @app.route('/login',methods=['POST','GET'])
@@ -37,7 +37,7 @@ def login():
       result = cursor.fetchone()
 
       if result and check_password_hash(result[0], password):
-         return redirect(url_for('index'))
+         return redirect('index.html')
       else:
          return 'Invalid username',400
    return render_template('login.html')
