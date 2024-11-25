@@ -6,7 +6,7 @@ app = Flask(__name__)
 app.secret_key = "Mp!2005"
 
 def get_db_connection():
-   return mysql.connector.connect(host="localhost",username="root",password="Mp!2005",database="perfume_company")
+   return mysql.connector.connect(host="localhost",username="root",password="******",database="perfume_company")
 
 @app.route('/',methods=['POST','GET'])
 def index():
