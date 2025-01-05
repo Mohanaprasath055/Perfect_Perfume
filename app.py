@@ -1,12 +1,20 @@
 from flask import Flask, request, render_template, redirect, url_for, session
 import mysql.connector
 from werkzeug.security import generate_password_hash,check_password_hash
+import os
 
-app = Flask(__name__)
-app.secret_key = "Mp!2005"
+app = Flask(_name_)
+app.secret_key = "virat1807"
 
 def get_db_connection():
-   return mysql.connector.connect(host="localhost",username="root",password="******",database="perfume_company")
+    conn = mysql.connector.connect(
+        host=os.environ['DB_HOST'],
+        user=os.environ['DB_USERNAME'],
+        password=os.environ['DB_PASSWORD'],
+        database=os.environ['DB_DBNAME']
+    )
+    return conn
+
 
 @app.route('/',methods=['POST','GET'])
 def index():
@@ -327,5 +335,5 @@ def logout():
    session.pop('user_status',None)
    return redirect(url_for('index'))
 
-if __name__ == '__main__':
+if _name_ == '_main_':
    app.run(debug=True)
