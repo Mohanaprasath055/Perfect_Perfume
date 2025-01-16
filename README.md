@@ -1,5 +1,5 @@
 <h1>PERFECT PERFUME</h1>
-<h4>A scalable e-commerce platform for direct perfume sales, focusing on backend system integration and user interface optimization. Also, implemented a dynamic cart system to enhance the shopping experience, ensuring smooth transactions and user interactions. </h4>
+<h4>A scalable e-commerce platform for direct perfume sales, focusing on backend system integration and user interface optimization. Also, implemented a dynamic cart system to enhance the shopping experience, ensuring smooth transactions and user interactions with order confirmation mail system. </h4>
 <hr>
 <h2>Technologies Used</h2>
 <h3>Frontend:</h3>
