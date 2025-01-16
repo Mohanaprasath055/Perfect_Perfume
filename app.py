@@ -1,10 +1,19 @@
 from flask import Flask, request, render_template, redirect, url_for, session
 import mysql.connector
+from flask_mail import *
 from werkzeug.security import generate_password_hash,check_password_hash
 import os
 
-app = Flask(_name_)
+app = Flask(__name__)
 app.secret_key = "virat1807"
+app.config["MAIL_SERVER"]='smtp.gmail.com'  
+app.config["MAIL_PORT"] = 465     
+app.config["MAIL_USERNAME"] = 'perfectperfumeteam@gmail.com'  
+app.config['MAIL_PASSWORD'] = 'lafg uwib fulf ogiy'  
+app.config['MAIL_USE_TLS'] = False  
+app.config['MAIL_USE_SSL'] = True
+  
+mail = Mail(app)
 
 def get_db_connection():
     conn = mysql.connector.connect(
@@ -198,6 +207,12 @@ def Buy_now(product_id):
                            )
                cursor.execute("INSERT INTO orders(user_id,product_id,address,quantity) values(%s,%s,%s,%s)",(user_id,product_id,address,quantity))
                conn.commit()
+               cursor.execute("SELECT email from customerdetails where username = %s",(username,))
+               email = cursor.fetchone()
+               email = email[0]
+               msg = Message("Order placed Successfully - Perfect Perfume",sender = "perfectperfumeteam@gmail.com",recipients = [email])
+               msg.body = f"Dear {username},\nYou will receive your order in two to three days... \n\nRegards,\nPerfect-Perfume"
+               mail.send(msg)
                return redirect(url_for('confirmation',product_id=product_id,quantity=quantity))
          return render_template('Buy_now.html',product_id=product_id)
       finally:
@@ -227,6 +242,12 @@ def Buy_cart():
                if not plot_no or not street_address or not area or not state or not pincode or not country:
                   return "All fields are required!",400
                address(plot_no,street_address,area,state,pincode,country)
+               cursor.execute("SELECT email from customerdetails where username = %s",(username,))
+               email = cursor.fetchone()
+               email = email[0]
+               msg = Message("Order placed Successfully - Perfect Perfume",sender = "perfectperfumeteam@gmail.com",recipients = [email])
+               msg.body = f"Dear {username},\nYou will receive your order in two to three days... \n\nRegards,\nPerfect-Perfume"
+               mail.send(msg)
                return redirect(url_for('confirmation_cart'))
             return render_template('Buy_cart.html') 
       finally:
@@ -334,6 +355,26 @@ def confirmation(product_id,quantity):
 def logout():
    session.pop('user_status',None)
    return redirect(url_for('index'))
+    
+@app.route('/Delete_cart',methods=['POST','GET'])
+def Delete_cart():
+   if 'user_status' in session and (session['user_status'] == "Registered" or session['user_status'] == "logged_in"):
+      username = session.get('username')
+      conn = get_db_connection()
+      cursor = conn.cursor()
+      cursor.execute("SELECT user_id from customerdetails where username = %s",(username,))
+      user_id = cursor.fetchone()
+      if user_id:
+         user_id = user_id[0]
+         cursor.execute("DELETE FROM cart WHERE user_id = %s", (user_id,))
+         conn.commit()
+         return redirect(url_for('index'))
+      cursor.close()
+      conn.close()
+      if not user_id:
+         return "user not found",400
+   else:
+      return redirect(url_for('login'))
 
-if _name_ == '_main_':
+if __name__ == '__main__':
    app.run(debug=True)
