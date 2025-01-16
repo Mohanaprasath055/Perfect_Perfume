@@ -211,7 +211,7 @@ def Buy_now(product_id):
                email = cursor.fetchone()
                email = email[0]
                msg = Message("Order placed Successfully - Perfect Perfume",sender = "perfectperfumeteam@gmail.com",recipients = [email])
-               msg.body = f"Dear {username},\nYou will receive your order in two to three days... \n\nRegards,\nPerfect-Perfume"
+               msg.body = f"Dear {username},\nYour order has been placed. Thankyou for purchasing our product. You will receive your order in two to three days... \n\nRegards,\nPerfect-Perfume"
                mail.send(msg)
                return redirect(url_for('confirmation',product_id=product_id,quantity=quantity))
          return render_template('Buy_now.html',product_id=product_id)
