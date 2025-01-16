@@ -5,11 +5,11 @@ from werkzeug.security import generate_password_hash,check_password_hash
 import os
 
 app = Flask(__name__)
-app.secret_key = "virat1807"
+app.secret_key = "*****" #your password
 app.config["MAIL_SERVER"]='smtp.gmail.com'  
 app.config["MAIL_PORT"] = 465     
 app.config["MAIL_USERNAME"] = 'perfectperfumeteam@gmail.com'  
-app.config['MAIL_PASSWORD'] = 'lafg uwib fulf ogiy'  
+app.config['MAIL_PASSWORD'] = '*****' #your smtp password  
 app.config['MAIL_USE_TLS'] = False  
 app.config['MAIL_USE_SSL'] = True
   
@@ -246,7 +246,7 @@ def Buy_cart():
                email = cursor.fetchone()
                email = email[0]
                msg = Message("Order placed Successfully - Perfect Perfume",sender = "perfectperfumeteam@gmail.com",recipients = [email])
-               msg.body = f"Dear {username},\nYou will receive your order in two to three days... \n\nRegards,\nPerfect-Perfume"
+               msg.body = f"Dear {username},\nYour order has been placed. Thankyou for purchasing our product.You will receive your order in two to three days... \n\nRegards,\nPerfect-Perfume"
                mail.send(msg)
                return redirect(url_for('confirmation_cart'))
             return render_template('Buy_cart.html') 
