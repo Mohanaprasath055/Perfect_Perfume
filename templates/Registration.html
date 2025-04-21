@@ -153,29 +153,35 @@
         .login-link a:hover {
             text-decoration: underline;
         }
+        #otp-verify{
+            display:none;
+        }
+        .error {
+            color: red;
+            font-size: 0.9rem;
+        }
     </style>
 </head>
 <body>
 
 <form method="POST" action="{{ url_for('Registration') }}">
     <h1>Registration Form</h1>
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <p class="error">{{ messages[0] }}</p>
+        {% endif %}
+    {% endwith %}
     <label for="username">Username</label>
-    <input type="text" name="username" placeholder="Enter your name">
+        <input type="text" name="username" placeholder="Enter your name" required>
 
-    <label for="password">Password</label>
-    <input type="password" name="password" placeholder="Set a password">
+        <label for="password">Password</label>
+        <input type="password" name="password" placeholder="Set a password" required>
 
-    <label for="email">Email</label>
-    <input type="email" name="email" placeholder="Enter your email">
+        <label for="email">Email</label>
+        <input type="email" name="email" placeholder="Enter your email" required>
 
-    <!--label for="gender">Gender</label>
-    <div class="radio-group">
-        <label><input type="radio" name="Gender" value="Male"> Male</label>
-        <label><input type="radio" name="Gender" value="Female"> Female</label>
-    </div-->
-    <button type="submit">Submit</button>
-    <button type="reset" class="reset-button">Reset</button>
-
+        <button type="submit">Submit</button>
+        <button type="reset" class="reset-button">Reset</button>
     <div class="alternative">
         <hr><h5>Or</h5><hr>
     </div>

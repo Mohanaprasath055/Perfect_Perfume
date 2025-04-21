@@ -8,7 +8,6 @@ import time
 
 app = Flask(__name__)
 app.secret_key = os.getenv('APP_SECRET')
-
 app.config["MAIL_SERVER"] = 'smtp.gmail.com'
 app.config["MAIL_PORT"] = os.getenv('MAILPORT')
 app.config["MAIL_USERNAME"] = os.getenv('EMAIL')
@@ -23,7 +22,8 @@ def get_db_connection():
         host=os.getenv('DB_HOST'),
         user=os.getenv('DB_USERNAME'),
         password=os.getenv('DB_PASSWORD'),
-        database=os.getenv('DB_DBNAME')
+        database=os.getenv('DB_DBNAME'),
+        ssl_ca=os.getenv('DB_SSL_CA')
     )
 
 
@@ -32,7 +32,7 @@ def generate_otp_secret():
 
 def send_otp(email, otp):
     msg = Message("Your OTP Code", sender=os.getenv('EMAIL'), recipients=[email])
-    msg.body = f"Your OTP code is: {otp}. It is valid for 1 minute."
+    msg.body = f"Your OTP code is: {otp}. It is valid for 5 minutes."
 
     try:
         mail.send(msg)
@@ -56,13 +56,12 @@ def Registration():
         session['otp_secret'] = otp_secret
 
         totp = pyotp.TOTP(otp_secret)
-        otp = totp.now()
-        session['otp_timestamp'] = int(time.time()) 
-
-        print(f"Generated OTP: {otp}")
+        timestamp = int(time.time())
+        otp = totp.at(timestamp)
+        session['otp_timestamp'] = timestamp
 
         if send_otp(session['email'], otp):
-            flash("OTP sent to your email. Please verify within 1 minute.", "info")
+            flash("OTP sent to your email. Please verify within 5 minutes.", "info")
             return redirect(url_for('verify_otp'))
         else:
             flash("Failed to send OTP. Try again.", "danger")
@@ -73,19 +72,30 @@ def Registration():
 @app.route('/verify_otp', methods=['GET', 'POST'])
 def verify_otp():
     if request.method == 'POST':
-        entered_otp = request.form.get('otp')
-
+        entered_otp = request.form.get('otp').strip()
         if 'otp_secret' in session and 'otp_timestamp' in session:
-            if int(time.time()) - session['otp_timestamp'] > 60:
+            if int(time.time()) - session['otp_timestamp'] > 300:
                 flash("OTP expired. Register again.", "danger")
                 return redirect(url_for('Registration'))
 
             totp = pyotp.TOTP(session['otp_secret'])
-            if totp.verify(entered_otp, valid_window=0): 
+            otp_timestamp = session['otp_timestamp']
+            time_window = 30
+
+            valid = False
+            for offset in [-1, 0, 1]:
+                test_time = otp_timestamp + (offset * time_window)
+                expected_otp = totp.at(test_time)
+                if entered_otp == expected_otp:
+                    valid = True
+                    break
+
+            if valid:
                 session["user_status"] = "Registered"
                 conn = get_db_connection()
                 cursor = conn.cursor()
-                msg = Message("Welcome to Perfect Perfume! ", sender=os.getenv('EMAIL'), recipients=[session["email"]])
+
+                msg = Message("Welcome to Perfect Perfume!", sender=os.getenv('EMAIL'), recipients=[session["email"]])
                 msg.body = f"""
 Dear {session['username']},
 
@@ -100,6 +110,7 @@ Best wishes,
 Perfect Perfume Team
 """
                 mail.send(msg)
+
                 cursor.execute("INSERT INTO customerdetails (username, password, email) VALUES (%s, %s, %s)",
                                (session['username'], session['password'], session['email']))
                 conn.commit()
@@ -108,6 +119,7 @@ Perfect Perfume Team
 
                 session.pop('otp_secret', None)
                 session.pop('otp_timestamp', None)
+
                 flash("OTP Verified! Registration successful.", "success")
                 return redirect(url_for('index'))
             else:
@@ -150,7 +162,7 @@ def view_cart():
       user_id = cursor.fetchone()
       if user_id:
          user_id = user_id[0]
-         cursor.execute("""SELECT p.product_name,p.target_gender,p.item_form,p.Ingredients,p.special_feature,p.item_volume,p.country,c.quantity,(p.price*c.quantity) as price 
+         cursor.execute("""SELECT p.product_name,p.target_gender,p.item_form,p.Ingredients,p.special_features,p.item_volume,p.country,c.quantity,(p.price*c.quantity) as price 
                         from cart c 
                         join product p on p.product_id = c.product_id 
                         where c.user_id = %s
