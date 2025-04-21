@@ -1,81 +1,157 @@
-from flask import Flask, request, render_template, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, flash
 import mysql.connector
-from flask_mail import *
-from werkzeug.security import generate_password_hash,check_password_hash
+from flask_mail import Mail, Message
+from werkzeug.security import generate_password_hash, check_password_hash
 import os
+import pyotp
+import time
 
 app = Flask(__name__)
-app.secret_key = "virat1807"
-app.config["MAIL_SERVER"]='smtp.gmail.com'  
-app.config["MAIL_PORT"] = 465     
-app.config["MAIL_USERNAME"] = 'perfectperfumeteam@gmail.com'  
-app.config['MAIL_PASSWORD'] = 'lafg uwib fulf ogiy'  
-app.config['MAIL_USE_TLS'] = False  
+app.secret_key = os.getenv('APP_SECRET')
+app.config["MAIL_SERVER"] = 'smtp.gmail.com'
+app.config["MAIL_PORT"] = os.getenv('MAILPORT')
+app.config["MAIL_USERNAME"] = os.getenv('EMAIL')
+app.config['MAIL_PASSWORD'] = os.getenv('EMAIL_PWD')
+app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
-  
+
 mail = Mail(app)
 
 def get_db_connection():
-    conn = mysql.connector.connect(
-        host=os.environ['DB_HOST'],
-        user=os.environ['DB_USERNAME'],
-        password=os.environ['DB_PASSWORD'],
-        database=os.environ['DB_DBNAME']
+    return mysql.connector.connect(
+        host=os.getenv('DB_HOST'),
+        user=os.getenv('DB_USERNAME'),
+        password=os.getenv('DB_PASSWORD'),
+        database=os.getenv('DB_DBNAME'),
+        ssl_ca=os.getenv('DB_SSL_CA')
     )
-    return conn
 
 
-@app.route('/',methods=['POST','GET'])
+def generate_otp_secret():
+    return pyotp.random_base32()
+
+def send_otp(email, otp):
+    msg = Message("Your OTP Code", sender=os.getenv('EMAIL'), recipients=[email])
+    msg.body = f"Your OTP code is: {otp}. It is valid for 5 minutes."
+
+    try:
+        mail.send(msg)
+        return True
+    except Exception as e:
+        print("Error sending OTP:", e)
+        return False
+
+@app.route('/', methods=['POST', 'GET'])
 def index():
-   return render_template('index.html')
+    return render_template('index.html')
 
-@app.route('/Registration',methods=['POST','GET'])
+@app.route('/Registration', methods=['GET', 'POST'])
 def Registration():
-   if request.method == 'POST':
-      username = request.form.get('username')
-      password = request.form.get('password')
-      email = request.form.get('email')
-      if not username or not password or not email:
-         return "All fields are required!",400
-      
-      session['user_status'] = "Registered"
-      session['username'] = username
-      
-      register(username,password,email)
-      return redirect(url_for('index'))
-   return render_template('Registration.html')
+    if request.method == 'POST':
+        session['username'] = request.form.get('username')
+        session['password'] = generate_password_hash(request.form.get('password'))
+        session['email'] = request.form.get('email')
 
-@app.route('/login',methods=['POST','GET'])
+        otp_secret = generate_otp_secret()
+        session['otp_secret'] = otp_secret
+
+        totp = pyotp.TOTP(otp_secret)
+        timestamp = int(time.time())
+        otp = totp.at(timestamp)
+        session['otp_timestamp'] = timestamp
+
+        if send_otp(session['email'], otp):
+            flash("OTP sent to your email. Please verify within 5 minutes.", "info")
+            return redirect(url_for('verify_otp'))
+        else:
+            flash("Failed to send OTP. Try again.", "danger")
+            return redirect(url_for('Registration'))
+
+    return render_template('Registration.html')
+
+@app.route('/verify_otp', methods=['GET', 'POST'])
+def verify_otp():
+    if request.method == 'POST':
+        entered_otp = request.form.get('otp').strip()
+        if 'otp_secret' in session and 'otp_timestamp' in session:
+            if int(time.time()) - session['otp_timestamp'] > 300:
+                flash("OTP expired. Register again.", "danger")
+                return redirect(url_for('Registration'))
+
+            totp = pyotp.TOTP(session['otp_secret'])
+            otp_timestamp = session['otp_timestamp']
+            time_window = 30
+
+            valid = False
+            for offset in [-1, 0, 1]:
+                test_time = otp_timestamp + (offset * time_window)
+                expected_otp = totp.at(test_time)
+                if entered_otp == expected_otp:
+                    valid = True
+                    break
+
+            if valid:
+                session["user_status"] = "Registered"
+                conn = get_db_connection()
+                cursor = conn.cursor()
+
+                msg = Message("Welcome to Perfect Perfume!", sender=os.getenv('EMAIL'), recipients=[session["email"]])
+                msg.body = f"""
+Dear {session['username']},
+
+We're thrilled to have you as part of our fragrance family. Explore our exquisite collection of perfumes crafted to enchant your senses. Whether you’re seeking a signature scent or a gift for someone special, we have something perfect for you!
+
+✨ Enjoy exclusive discounts and special offers as a valued member.  
+🚚 Free delivery on your first order!  
+
+Feel free to reach out if you have any questions or need assistance. Happy exploring!
+
+Best wishes,  
+Perfect Perfume Team
+"""
+                mail.send(msg)
+
+                cursor.execute("INSERT INTO customerdetails (username, password, email) VALUES (%s, %s, %s)",
+                               (session['username'], session['password'], session['email']))
+                conn.commit()
+                cursor.close()
+                conn.close()
+
+                session.pop('otp_secret', None)
+                session.pop('otp_timestamp', None)
+
+                flash("OTP Verified! Registration successful.", "success")
+                return redirect(url_for('index'))
+            else:
+                flash("Invalid OTP. Try again.", "danger")
+        else:
+            flash("OTP session expired. Register again.", "danger")
+            return redirect(url_for('Registration'))
+
+    return render_template('verify_otp.html')
+
+@app.route('/login', methods=['GET', 'POST'])
 def login():
-   if request.method=='POST':
-      username = request.form.get('username')
-      password = request.form.get('password')
-      conn = get_db_connection()
-      cursor = conn.cursor()
-      cursor.execute("SELECT password FROM customerdetails WHERE username=%s", (username,))
-      result = cursor.fetchone()
-      cursor = conn.cursor()
-      conn.close()
-      
-      if result and check_password_hash(result[0], password):
-         session['user_status'] = "logged_in"
-         session['username'] = username
-         return redirect(url_for('index'))
-      else:
-         return 'Invalid username',400
-   return render_template('login.html')
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
 
-def register(username,password,email):
-   conn = get_db_connection()
-   cursor = conn.cursor()
-   hashed_password = generate_password_hash(password)
-   query = "INSERT INTO customerdetails(username,password,email) VALUES(%s,%s,%s)"
-   values = (username,hashed_password,email)
-   cursor.execute(query,values)
-   conn.commit()
-   cursor.close()
-   conn.close()
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT password FROM customerdetails WHERE username = %s", (username,))
+        result = cursor.fetchone()
+        cursor.close()
+        conn.close()
 
+        if result and check_password_hash(result[0], password):
+            session['username'] = username
+            session["user_status"] = "logged_in"
+            flash("Login successful!", "success")
+            return redirect(url_for('index'))
+        else:
+            flash("Invalid username or password.", "danger")
+
+    return render_template('login.html')
 @app.route('/view_cart',methods=['GET'])
 def view_cart():
    if 'user_status' in session and (session['user_status']=="Registered" or session['user_status']=="logged_in"):
@@ -86,7 +162,7 @@ def view_cart():
       user_id = cursor.fetchone()
       if user_id:
          user_id = user_id[0]
-         cursor.execute("""SELECT p.product_name,p.target_gender,p.item_form,p.Ingredients,p.special_feature,p.item_volume,p.country,c.quantity,(p.price*c.quantity) as price 
+         cursor.execute("""SELECT p.product_name,p.target_gender,p.item_form,p.Ingredients,p.special_features,p.item_volume,p.country,c.quantity,(p.price*c.quantity) as price 
                         from cart c 
                         join product p on p.product_id = c.product_id 
                         where c.user_id = %s
@@ -210,7 +286,7 @@ def Buy_now(product_id):
                cursor.execute("SELECT email from customerdetails where username = %s",(username,))
                email = cursor.fetchone()
                email = email[0]
-               msg = Message("Order placed Successfully - Perfect Perfume",sender = "perfectperfumeteam@gmail.com",recipients = [email])
+               msg = Message("Order placed Successfully - Perfect Perfume",sender = os.getenv('EMAIL'),recipients = [email])
                msg.body = f"Dear {username},\nYou will receive your order in two to three days... \n\nRegards,\nPerfect-Perfume"
                mail.send(msg)
                return redirect(url_for('confirmation',product_id=product_id,quantity=quantity))
@@ -245,7 +321,7 @@ def Buy_cart():
                cursor.execute("SELECT email from customerdetails where username = %s",(username,))
                email = cursor.fetchone()
                email = email[0]
-               msg = Message("Order placed Successfully - Perfect Perfume",sender = "perfectperfumeteam@gmail.com",recipients = [email])
+               msg = Message("Order placed Successfully - Perfect Perfume",sender = os.getenv('EMAIL'),recipients = [email])
                msg.body = f"Dear {username},\nYou will receive your order in two to three days... \n\nRegards,\nPerfect-Perfume"
                mail.send(msg)
                return redirect(url_for('confirmation_cart'))
@@ -351,10 +427,6 @@ def confirmation(product_id,quantity):
          cursor.close()
          conn.close()
 
-@app.route('/logout',methods=['POST','GET'])
-def logout():
-   session.pop('user_status',None)
-   return redirect(url_for('index'))
     
 @app.route('/Delete_cart',methods=['POST','GET'])
 def Delete_cart():
@@ -375,6 +447,11 @@ def Delete_cart():
          return "user not found",400
    else:
       return redirect(url_for('login'))
+   
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('login'))
 
 if __name__ == '__main__':
-   app.run(debug=True)
+    app.run(debug=True)
