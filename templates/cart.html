@@ -97,6 +97,7 @@
 <body>
     <div class="box">
         <h1>YOUR CART</h1>
+        <a href="{{ url_for('index') }}">Return to home</a>
         <br>
         {% if cart_items %}
         <table>
@@ -126,12 +127,13 @@
             {% endfor %}
         </table>
         <h5>Total price: ₹ {{ grand_total }}</h5>
+        <a href="{{ url_for('Delete_cart') }}" style="background-color:red;">Empty cart</a>
+        <br>
         <a href="{{ url_for('Buy_cart') }}">Proceed to Pay</a>
         {% else %}
         <h1>Your cart is empty</h1>
         {% endif %}
         <br><br>
-        <a href="{{ url_for('index') }}">Return to home</a>
     </div>
 </body>
 </html>
