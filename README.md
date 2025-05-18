@@ -6,7 +6,6 @@
 <ul>
   <li>HTML.</li>
   <li>CSS.</li>
-  <li>JavaScript.</li>
   <li>CSS Bootstrap.</li>
 </ul>
 <h3>Backend:</h3>
