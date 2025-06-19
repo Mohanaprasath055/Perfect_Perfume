@@ -1,32 +1,3 @@
-<h1>PERFECT PERFUME</h1>
-<h4>A scalable e-commerce platform for direct perfume sales, focusing on backend system integration and user interface optimization. Also, implemented a dynamic cart system to enhance the shopping experience, ensuring smooth transactions and user interactions with order confirmation mail system. </h4>
-<hr>
-<h2>Technologies Used</h2>
-<h3>Frontend:</h3>
-<ul>
-  <li>HTML.</li>
-  <li>CSS.</li>
-  <li>CSS Bootstrap.</li>
-</ul>
-<h3>Backend:</h3>
-<ul>
-  <li>Python.</li>
-  <li>Flask.</li>
-  <li>MySQL.</li>
-  <li>werkzeug.security</li>
-</ul>
-<h3>Programming concepts</h3>
-<ul>
-  <li>Object Oriented Programming.</li>
-  <li>DSA - Stack.</li>
-  <li>Sorting.</li>
-</ul>
-<h3>HOW TO GET STARTED:</h3>
-     <p> <b>Step 1:</b> Clone the Repository to your local Environment.</p>
-     <p> <b>Step 2:</b> Open your MySQL Workbench.</p>
-     <p> <b>Step 3:</b> Copy paste the following comments in the workspace of MySQL.</p>
-     
-=======
 # PERFECT PERFUME
 
 A scalable e-commerce platform for direct perfume sales, focusing on backend system integration and user interface optimization. Implemented a dynamic cart system to enhance the shopping experience, ensuring smooth transactions and user interactions with an order confirmation email system. Now hosted on **Vercel** for seamless deployment.
