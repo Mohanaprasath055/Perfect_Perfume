@@ -47,7 +47,6 @@ EMAIL_PWD=your_app_password
 ### Step 3: Set Up MySQL Database
 Open MySQL Workbench and execute the following SQL commands:
 
->>>>>>> 54a42ea568d2d30b43ef91437691af49505ad094
 ```sql
 CREATE DATABASE perfume_company;
 USE perfume_company;
