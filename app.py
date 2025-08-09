@@ -13,7 +13,7 @@ app.config["MAIL_PORT"] = os.getenv('MAILPORT')
 app.config["MAIL_USERNAME"] = os.getenv('EMAIL')
 app.config['MAIL_PASSWORD'] = os.getenv('EMAIL_PWD')
 app.config['MAIL_USE_TLS'] = False
-app.config['MAIL_USE_SSL'] = True
+app.config['MAIL_USE_SSL'] = True  #We are using SSL(Secure Sockets Layer) -> port number: 465
 
 mail = Mail(app)
 
@@ -28,10 +28,10 @@ def get_db_connection():
 
 
 def generate_otp_secret():
-    return pyotp.random_base32()
+    return pyotp.random_base32() #Generates a random base 32 encoded key.
 
 def send_otp(email, otp):
-    msg = Message("Your OTP Code", sender=os.getenv('EMAIL'), recipients=[email])
+    msg = Message("Your OTP Code", sender=os.getenv('EMAIL'), recipients=[email]) #Creates a new mail object using flask-mail.
     msg.body = f"Your OTP code is: {otp}. It is valid for 5 minutes."
 
     try:
@@ -49,7 +49,7 @@ def index():
 def Registration():
     if request.method == 'POST':
         session['username'] = request.form.get('username')
-        session['password'] = generate_password_hash(request.form.get('password'))
+        session['password'] = generate_password_hash(request.form.get('password')) #PBKDF2 (Password-Based Key Derivation Function 2) + SHA256
         session['email'] = request.form.get('email')
 
         otp_secret = generate_otp_secret()
@@ -83,7 +83,7 @@ def verify_otp():
             time_window = 30
 
             valid = False
-            for offset in [-1, 0, 1]:
+            for offset in [-1, 0, 1]:  #To check the otp of -1 -> 30 seconds before timestrap, 0 -> correct timestrap, 1 -> 30 after timestrap. So, that we can avoid timemismatch.
                 test_time = otp_timestamp + (offset * time_window)
                 expected_otp = totp.at(test_time)
                 if entered_otp == expected_otp:
@@ -161,7 +161,7 @@ def view_cart():
       cursor.execute("SELECT user_id from customerdetails where username = %s",(username,))
       user_id = cursor.fetchone()
       if user_id:
-         user_id = user_id[0]
+         user_id = user_id[0] 
          cursor.execute("""SELECT p.product_name,p.target_gender,p.item_form,p.Ingredients,p.special_features,p.item_volume,p.country,c.quantity,(p.price*c.quantity) as price 
                         from cart c 
                         join product p on p.product_id = c.product_id 

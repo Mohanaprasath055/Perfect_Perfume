@@ -1,6 +1,7 @@
 # PERFECT PERFUME
 
-A scalable e-commerce platform for direct perfume sales, focusing on backend system integration and user interface optimization. Implemented a dynamic cart system to enhance the shopping experience, ensuring smooth transactions and user interactions with an order confirmation email system. Now hosted on **Vercel** for seamless deployment.
+A scalable e-commerce platform for direct perfume sales, focusing on backend system integration and user interface optimization. Implemented a dynamic cart system to enhance the shopping experience, ensuring smooth transactions and user interactions. Integrated OTP verification for secure user authentication and an email confirmation system for order notifications using Flask-Mail. Now hosted on *Vercel* for seamless deployment.
+
 
 ---
 
