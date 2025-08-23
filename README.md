@@ -1,7 +1,6 @@
 # PERFECT PERFUME
 
-A scalable e-commerce platform for direct perfume sales, focusing on backend system integration and user interface optimization. Implemented a dynamic cart system to enhance the shopping experience, ensuring smooth transactions and user interactions. Integrated OTP verification for secure user authentication and an email confirmation system for order notifications using Flask-Mail. Now hosted on *Vercel* for seamless deployment.
-
+A scalable e-commerce platform for direct perfume sales, focusing on backend system integration and user interface optimization. Implemented a dynamic cart system to enhance the shopping experience, ensuring smooth transactions and user interactions with an order confirmation email system. Now hosted on **Vercel** for seamless deployment.
 
 ---
 
@@ -10,7 +9,6 @@ A scalable e-commerce platform for direct perfume sales, focusing on backend sys
 ### Frontend:
 - HTML
 - CSS
-- JavaScript
 - Bootstrap
 
 ### Backend:
@@ -43,6 +41,11 @@ Create a `.env` file and add the following configurations:
 APP_SECRET=your_secret_key
 EMAIL=your_email
 EMAIL_PWD=your_app_password
+DB_HOST=your_db_hostname
+DB_USERNAME=your_db_username
+DB_PASSWORD=your_db_password
+DB_DBNAME=your_db_name
+MAILPORT=your_mail_port
 ```
 
 ### Step 3: Set Up MySQL Database
@@ -75,6 +78,9 @@ INSERT INTO product VALUES
 (1, 'Floral Perfume', 'Unisex', 'Spray', 'Jasmine', 'Natural Ingredients', 60, 'India', 599),
 (2, 'Woody Perfume', 'Unisex', 'Spray', 'Cedarwood', 'Long-lasting', 60, 'India', 699),
 (3, 'Citrus Perfume', 'Unisex', 'Spray', 'Essential Oils', 'Fresh Fragrance', 60, 'India', 799);
+(4,'Oriental Perfume','unisex','bar','honey','Natural_ingredients',60,'India',599),
+(5,'Fresh Aquatic Perfume','unisex','bar','honey','Natural_ingredients',60,'India',599),
+(6,'Gourmand Perfume','unisex','bar','honey','Natural_ingredients',60,'India',599);
 
 CREATE TABLE address (
     address_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -94,6 +100,7 @@ CREATE TABLE orders (
     product_id INT,
     order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     quantity INT,
+    address VARCHAR(100),
     FOREIGN KEY (user_id) REFERENCES customerdetails(user_id),
     FOREIGN KEY (product_id) REFERENCES product(product_id)
 );
@@ -103,6 +110,7 @@ CREATE TABLE cart (
     user_id INT,
     product_id INT,
     quantity INT DEFAULT 1,
+    added_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES customerdetails(user_id),
     FOREIGN KEY (product_id) REFERENCES product(product_id)
 );
@@ -119,6 +127,3 @@ Start the Flask application using:
 ```bash
 python app.py
 ```
-
-
-
