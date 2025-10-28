@@ -1,13 +1,28 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask_dance.contrib.google import make_google_blueprint, google
 import mysql.connector
 from flask_mail import Mail, Message
 from werkzeug.security import generate_password_hash, check_password_hash
+from dotenv import load_dotenv
+# from flask_wtf.csrf import CSRFProtect
 import os
 import pyotp
 import time
-
+load_dotenv()  
+os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = os.getenv('OIT')
 app = Flask(__name__)
-app.secret_key = os.getenv('APP_SECRET')
+# csrf = CSRFProtect(app)
+google_bp = make_google_blueprint(
+    client_id=os.getenv("GOOGLE_OAUTH_CLIENT_ID"),
+    client_secret=os.getenv("GOOGLE_OAUTH_CLIENT_SECRET"),
+    scope=["openid", "https://www.googleapis.com/auth/userinfo.email", "https://www.googleapis.com/auth/userinfo.profile"],
+    redirect_to="google_login",
+    reprompt_consent=True  # forces account selection
+)
+
+app.register_blueprint(google_bp, url_prefix="/login")
+app.secret_key = os.getenv('APP_SECRET','supersecret')
+
 app.config["MAIL_SERVER"] = 'smtp.gmail.com'
 app.config["MAIL_PORT"] = os.getenv('MAILPORT')
 app.config["MAIL_USERNAME"] = os.getenv('EMAIL')
@@ -16,6 +31,7 @@ app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True  #We are using SSL(Secure Sockets Layer) -> port number: 465
 
 mail = Mail(app)
+
 
 def get_db_connection():
     return mysql.connector.connect(
